@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 // TODO: Implement Option for user to see current gold status
 public class Driver {
+    private static final int GOLD_COIN_VALUE = 10;
     private static AbstractMaze maze;
     private static Player player;
     private static Scanner scan;
@@ -58,46 +59,46 @@ public class Driver {
         ending();
     }
 
-    // FIXME: Wrapped Room maze could move through edges
     /**
      * Get the next position of the User after interacting
      *
-     * @param moves possible moves of current position
+     * @param moves possible moves of current position [North, South, West, East]
      * @return Player's next position[row,col]
      */
     private int[] getNextPosition(boolean[] moves) {
         int r = player.row;
         int c = player.col;
 
-        // TODO: Remove
-        System.out.print("getNextMove-1: ");
-        printB(moves);
-        // [North, South, West, East]
+        boolean isWrapped = maze.getMazeType() == MazeType.WrappedRoomMaze;
 
         // Check for edges
-        moves[0] = moves[0] && r > 0;
-        moves[1] = moves[1] && r < row - 1;
-        moves[2] = moves[2] && c > 0;
-        moves[3] = moves[3] & c < col - 1;
+        if (!isWrapped) {
+            moves[0] = moves[0] && r > 0;
+            moves[1] = moves[1] && r < row - 1;
+            moves[2] = moves[2] && c > 0;
+            moves[3] = moves[3] & c < col - 1;
+        }
 
-        // TODO: Remove
-        System.out.print("getNextMove-2: ");
-        printB(moves);
         int res = askNextMove(createNextMovesOptions(moves), moves);
+
+        // Add special handlers for Wrapped Maze
         switch (res) {
-            case 1:
+            case 1: // North
+                if (isWrapped && r == 0) return new int[]{row-1, c};
                 return new int[]{r-1, c};
-            case 2:
+            case 2: // South
+                if (isWrapped && r == row-1) return new int[]{0, c};
                 return new int[]{r+1, c};
-            case 3:
+            case 3: // West
+                if (isWrapped && c == 0) return new int[]{r, col-1};
                 return new int[]{r, c-1};
-            case 4:
+            case 4: // East
+                if (isWrapped && c == col-1) return new int[]{r, 0};
                 return new int[]{r, c+1};
         }
         return null;
     }
 
-    // FIXME: Wrapped Room maze could move through edges
     /**
      * Based on the current available direction/moves,
      *  create an Option String
@@ -131,15 +132,13 @@ public class Driver {
                 maze = new PerfectMaze(row, col, startPoint, endPoint);
                 break;
             case WrappedRoomMaze:
-                // TODO: after implemented room maze 1
+                maze = new WrappedRoomMaze(row, col, startPoint, endPoint);
                 break;
             case UnwrappedRoomMaze:
-                // TODO: after implemented room maze 2
+                maze = new UnwrappedRoomMaze(row, col, startPoint, endPoint);
                 break;
         }
     }
-
-
 
     /////////////////////////////////////////////////////////////////////////////
     // Ask action methods
@@ -187,7 +186,6 @@ public class Driver {
 
     private int[] askEndPoint() {
         int[] res = new int[2];
-        // TODO
         String q1 = "Which row would you like to set the End Point at?";
         String q2 = "Which column would you like to set the End Point at?";
         res[0] = getNumber(q1, 0, row - 1);
@@ -231,17 +229,15 @@ public class Driver {
 
     private void ending() {
         System.out.println("Congratulation! You have reached the END.");
-        // TODO: add total moves
     }
 
     /////////////////////////////////////////////////////////////////////////////
     // Checker methods
     /////////////////////////////////////////////////////////////////////////////
-    // FIXME: for Wrapped Room Maze
     /**
      * Check if the Player's next move is valid
-     * @param moves
-     * @param res
+     * @param moves     Player's possible moves
+     * @param res       Player's choice of direction
      * @return
      */
     private boolean isValidMove(boolean[] moves, int res) {
@@ -256,22 +252,33 @@ public class Driver {
         checkThief();
     }
 
+    /**
+     * If Player meet a Gold,
+     *  update Player's status
+     *  update Cell's status
+     */
     private void checkGold() {
         if (maze.mMaze[player.row][player.col].hasGold()) {
-            player.meetGold(10);
-            // TODO: Notify Player
-        }
-    }
-
-    private void checkThief() {
-        if (maze.mMaze[player.row][player.col].hasThief()) {
-            player.meetThief();
-            // TODO: Notify Player
+            player.meetGold(GOLD_COIN_VALUE);
+            maze.mMaze[player.row][player.col].setGold(false); // Update cell status
         }
     }
 
     /**
-     * Quit the game if user type 0
+     * If Player meet a Thief,
+     *  update Player's status
+     *  update Cell's status
+     */
+    private void checkThief() {
+        if (maze.mMaze[player.row][player.col].hasThief()) {
+            player.meetThief();
+            maze.mMaze[player.row][player.col].setThief(false); // Update cell status
+        }
+    }
+
+    /**
+     * Quit the game if Player type 0
+     *
      * @param n User's response
      */
     private void checkQuit(int n) {
@@ -282,9 +289,11 @@ public class Driver {
     // Helper methods for interacting, retrieving, and parsing user's response
     /////////////////////////////////////////////////////////////////////////////
     /**
-     * @param q
-     * @param min number acceptable (inclusive)
-     * @param max number acceptable (inclusive)
+     * Get a numeric input from Player within a given range (inclusive min & max)
+     *
+     * @param q             formatted String contains questions and options
+     * @param min           number acceptable (inclusive)
+     * @param max           number acceptable (inclusive)
      * @return
      */
     int getNumber(String q, int min, int max) {
@@ -309,6 +318,12 @@ public class Driver {
         return n;
     }
 
+    /**
+     * Get a numeric input from Player
+     *
+     * @param q             formatted String contains questions and options
+     * @return              Player's numeric input
+     */
     int getNumber(String q) {
         System.out.println(q);
         String resp = scan.nextLine();
@@ -332,9 +347,11 @@ public class Driver {
     }
 
     /**
-     * @param q          formatted String contains questions and options
-     * @param numOptions the total number of options available for this question
-     * @return User's choice
+     * Get a numeric input of Choice(s) from Player
+     *
+     * @param q             formatted String contains questions and options
+     * @param numOptions    the total number of options available for this question
+     * @return              Player's choice
      */
     int getOption(String q, int numOptions) {
         System.out.println(q);

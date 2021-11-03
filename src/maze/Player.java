@@ -31,14 +31,20 @@ public class Player {
      */
     public void meetGold(int gold) {
         this.goldCount += gold;
+        System.out.printf("You just picked up %d Gold! You currently have %d Gold.\n",
+                gold, getGoldCount());
     }
 
     /**
      * a player "loses" 10% of their gold by entering a room with a thief
      */
-    public void meetThief() {
+    public void meetThief() throws IllegalStateException {
+        if (getGoldCount() < 0)
+            throw new IllegalStateException("Player's gold count cannot be negative");
         if (getGoldCount() == 0) return;
         this.goldCount = (int) (this.getGoldCount() * 0.9);
+        System.out.printf("Oops, you just robbed by a thief! You currently have %d Gold.\n",
+                 getGoldCount());
     }
 
     /**

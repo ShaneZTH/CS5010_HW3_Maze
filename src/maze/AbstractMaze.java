@@ -4,6 +4,10 @@ import java.util.Random;
 import java.util.Stack;
 
 public abstract class AbstractMaze implements MazeInterface {
+    final static private String INVALID_ROW_COL = "Row and column number must be positive";
+    final static private String INVALID_START_POINT = "Invalid start point!";
+    final static private String INVALID_END_POINT = "Invalid end point!";
+
     final private MazeType mazeType;
     final private int row;
     final private int col;
@@ -17,11 +21,20 @@ public abstract class AbstractMaze implements MazeInterface {
     Random rand;
 
     // TODO: add check for illegal parameters
-    public AbstractMaze(MazeType type, int row, int col, int[] startPoint, int[] endPoint) {
+    public AbstractMaze(MazeType type, int row, int col, int[] startPoint, int[] endPoint) throws IllegalArgumentException {
+        if (row <= 0 || col <= 0)
+            throw new IllegalArgumentException(INVALID_ROW_COL);
+        if (startPoint == null || startPoint.length != 2
+                || startPoint[0] < 0 || startPoint[1] >= row)
+            throw new IllegalArgumentException(INVALID_START_POINT);
+        if (endPoint == null || endPoint.length != 2
+                || endPoint[0] < 0 || endPoint[1] >= col)
+            throw new IllegalArgumentException(INVALID_END_POINT);
+
         this.mazeType = type;
         this.row = row;
         this.col = col;
-        this.totalWalls = row * (col-1) + (row-1) * col;
+        this.totalWalls = row * (col - 1) + (row - 1) * col;
         this.startPoint = startPoint;
         this.endPoint = endPoint;
         this.mMaze = new Cell[row][col];
@@ -86,42 +99,53 @@ public abstract class AbstractMaze implements MazeInterface {
     }
 
     @Override
-    public void formPerfectMaze(int row, int col) {
-            int totalCells = row * col;
-            int visited = 1;
+    public void formPerfectMaze(int row, int col) throws IllegalArgumentException {
+        if (row <= 0 || col <= 0)
+            throw new IllegalArgumentException(INVALID_ROW_COL);
 
-            int r = rand.nextInt(row);
-            int c = rand.nextInt(col);
+        int totalCells = row * col;
+        int visited = 1;
 
-            Stack<Cell> stack = new Stack<>();
-            Cell curr = mMaze[r][c];
+        int r = rand.nextInt(row);
+        int c = rand.nextInt(col);
 
-            while (visited < totalCells) {
-                Cell next = curr.getNeighborWithAllWalls();
+        Stack<Cell> stack = new Stack<>();
+        Cell curr = mMaze[r][c];
 
-                if (next == null) {
-                    curr = stack.pop();
-                } else {
-                    curr.knockDownWall(next);
-                    stack.push(curr);
-                    curr = next;
-                    visited++;
-                }
+        while (visited < totalCells) {
+            Cell next = curr.getNeighborWithAllWalls();
+
+            if (next == null) {
+                curr = stack.pop();
+            } else {
+                curr.knockDownWall(next);
+                stack.push(curr);
+                curr = next;
+                visited++;
             }
-            System.out.println("A Perfect Maze is formed");
+        }
+        System.out.println("A Perfect Maze is formed");
 
     }
 
-    boolean isStart(int r, int c) {
+    boolean isStart(int r, int c) throws IllegalArgumentException {
+        if (row <= 0 || col <= 0)
+            throw new IllegalArgumentException(INVALID_ROW_COL);
+
         return (r == startPoint[0]) && (c == startPoint[1]);
     }
 
-    boolean isEnd(int r, int c) {
+    boolean isEnd(int r, int c) throws IllegalArgumentException {
+        if (row <= 0 || col <= 0)
+            throw new IllegalArgumentException(INVALID_ROW_COL);
+
         return (r == endPoint[0]) && (c == endPoint[1]);
     }
 
-    // TODO: Add exception handlers
-    public Cell getCell(int r, int c) {
+    public Cell getCell(int r, int c) throws IllegalArgumentException {
+        if (row <= 0 || col <= 0)
+            throw new IllegalArgumentException(INVALID_ROW_COL);
+
         return mMaze[r][c];
     }
 
@@ -142,7 +166,7 @@ public abstract class AbstractMaze implements MazeInterface {
     }
 
     /**
-     * NOTE: for debugging only
+     * (for debugging only)
      * Print out the maze with Gold & Thief status and locations
      */
     @Override
@@ -152,7 +176,6 @@ public abstract class AbstractMaze implements MazeInterface {
         StringBuilder sb = new StringBuilder();
         sb.append("\n\nDEBUG: Printing the maze...\n");
         appendln(sb, (String.format("Maze of size %d x %d\n", R, C)));
-        // FIXME: Gold should be having specific value
         appendln(sb, ("'S'= Start | 'E'= End | 'G'= Gold | 'T'= Thief\n"));
         for (int i = 0; i < C; i++) {
             sb.append("+---");
@@ -170,7 +193,6 @@ public abstract class AbstractMaze implements MazeInterface {
                     sb.append("  ");
                 }
 
-                // TODO:
                 if (i == getStartPoint()[0] && j == getStartPoint()[1]) {
                     sb.append("S ");
                 } else if (i == getEndPoint()[0] && j == getEndPoint()[1]) {

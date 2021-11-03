@@ -15,27 +15,23 @@ public class PerfectMazeTest {
         maze.printMaze();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void generateGoldCoins() {
-        // tested & passed
     }
 
     @Test
     public void generateThief() {
-        // tested & passed
     }
 
     @Test
-    public void formMaze() {
-        // tested & passed
+    public void initMaze() {
+    }
+
+    @Test
+    public void formPerfectMaze() {
     }
 
     @Test
     public void printMaze() {
-        // tested & passed
     }
 }
