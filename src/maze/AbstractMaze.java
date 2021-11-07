@@ -129,23 +129,22 @@ public abstract class AbstractMaze implements MazeInterface {
     }
 
     boolean isStart(int r, int c) throws IllegalArgumentException {
-        if (row <= 0 || col <= 0)
+        if (r < 0 || c < 0 || r >= row || c >= col)
             throw new IllegalArgumentException(INVALID_ROW_COL);
 
         return (r == startPoint[0]) && (c == startPoint[1]);
     }
 
     boolean isEnd(int r, int c) throws IllegalArgumentException {
-        if (row <= 0 || col <= 0)
+        if (r < 0 || c < 0 || r >= row || c >= col)
             throw new IllegalArgumentException(INVALID_ROW_COL);
 
         return (r == endPoint[0]) && (c == endPoint[1]);
     }
 
     public Cell getCell(int r, int c) throws IllegalArgumentException {
-        if (row <= 0 || col <= 0)
+        if (r < 0 || c < 0 || r >= row || c >= col)
             throw new IllegalArgumentException(INVALID_ROW_COL);
-
         return mMaze[r][c];
     }
 

@@ -8,6 +8,6 @@ public class DriverTest {
 
     @Test
     public void getAnswer() {
-        // NOTE: tested & passed
+        // tested & passed
     }
 }

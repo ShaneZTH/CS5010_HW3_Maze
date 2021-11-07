@@ -5,7 +5,10 @@ public class Player {
     int row;
     int col;
 
-    public Player(int startX, int startY) {
+    public Player(int startX, int startY) throws IllegalArgumentException {
+        if (startX < 0 || startY < 0)
+            throw new IllegalArgumentException("Starting position must be positive");
+
         this.row = startY;
         this.col = startX;
         this.goldCount = 0;
@@ -18,6 +21,8 @@ public class Player {
      */
     public void updatePosition(int[] n) throws IllegalArgumentException {
         if (n == null || n.length != 2)
+            throw new IllegalArgumentException("Invalid position");
+        if (n[0] < 0 || n[1] < 0)
             throw new IllegalArgumentException("Invalid position");
 
         this.row = n[0];
@@ -42,6 +47,7 @@ public class Player {
         if (getGoldCount() < 0)
             throw new IllegalStateException("Player's gold count cannot be negative");
         if (getGoldCount() == 0) return;
+
         this.goldCount = (int) (this.getGoldCount() * 0.9);
         System.out.printf("Oops, you just robbed by a thief! You currently have %d Gold.\n",
                  getGoldCount());
