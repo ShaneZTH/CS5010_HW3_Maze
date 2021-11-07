@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class UnwrappedRoomMazeTest {
-    UnwrappedRoomMaze maze;
+    NonPerfectMaze maze;
 
     @Before
     public void setUp() throws Exception {
@@ -15,12 +15,22 @@ public class UnwrappedRoomMazeTest {
         maze.printMaze();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
-    public void printMaze() {
+    public void removeWalls() {
+        assertTrue(maze.getRemainWalls() < maze.totalWalls);
+        int count = 0;
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (j != 9 && maze.mMaze[i][j].isWallEast()) count++;
+                if (i != 9 && maze.mMaze[i][j].isWallSouth()) count++;
+            }
+        }
+        assertEquals(maze.getRemainWalls()-1, count);
+    }
 
+    @Test (expected = IllegalArgumentException.class)
+    public void randomlyRemoveWall() {
+        maze.randomlyRemoveWall(new Cell(), -1, 2);
     }
 }

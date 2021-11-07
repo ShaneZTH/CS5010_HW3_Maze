@@ -40,11 +40,14 @@ public abstract class NonPerfectMaze extends AbstractMaze {
      * @param c    the column number of this cell
      * @return true
      */
-    boolean randomlyRemoveWall(Cell cell, int r, int c) {
+    boolean randomlyRemoveWall(Cell cell, int r, int c) throws IllegalArgumentException {
+        if (r < 0 || c < 0 || r >= row || c >= col)
+            throw new IllegalArgumentException("Invalid row/column");
+
         int n = rand.nextInt(4) + 1;
         boolean hasRemoved = false;
         while (!hasRemoved) {
-            System.out.printf("(%d,%d): n=%d\n", r, c, n);
+//            System.out.printf("(%d,%d): n=%d\n", r, c, n);
             switch (n) {
                 case 1: // North
                     if (cell.isWallNorth()) {

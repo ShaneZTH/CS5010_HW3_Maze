@@ -9,8 +9,8 @@ public abstract class AbstractMaze implements MazeInterface {
     final static private String INVALID_END_POINT = "Invalid end point!";
 
     final private MazeType mazeType;
-    final private int row;
-    final private int col;
+    final int row;
+    final int col;
     final int totalWalls;
     int remainWalls;
     final private int goldNumber;
